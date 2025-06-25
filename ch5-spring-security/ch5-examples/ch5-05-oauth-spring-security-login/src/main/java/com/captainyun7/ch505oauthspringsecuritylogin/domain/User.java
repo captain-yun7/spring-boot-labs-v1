@@ -24,7 +24,7 @@ public class User {
     private String role; // "USER", "ADMIN"
     
     // OAuth2 관련 필드
-    private String provider; // "github", "local" 등
+    private String provider; // "github", "google" 등
     private String providerId; // OAuth2 공급자에서 제공하는 고유 ID
     private String name; // 사용자 실명
     private String imageUrl; // 프로필 이미지 URL

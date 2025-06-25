@@ -2,15 +2,11 @@ package com.captainyun7.ch505oauthspringsecuritylogin.controller;
 
 import com.captainyun7.ch505oauthspringsecuritylogin.dto.*;
 import com.captainyun7.ch505oauthspringsecuritylogin.service.AuthService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -19,6 +15,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
     
     private final AuthService authService;
@@ -53,15 +50,7 @@ public class AuthController {
     @GetMapping("/oauth2-providers")
     public ResponseEntity<Map<String, String>> getOAuth2Providers() {
         Map<String, String> providers = new HashMap<>();
-        providers.put("github", "/oauth2/authorize/github");
+        providers.put("google", "/oauth2/authorize/google");
         return ResponseEntity.ok(providers);
-    }
-    
-    /**
-     * OAuth2 로그인 후 리다이렉트 처리를 위한 엔드포인트
-     */
-    @GetMapping("/oauth2/redirect")
-    public ResponseEntity<JwtResponse> getOAuth2Tokens(@RequestParam String token, @RequestParam String refreshToken) {
-        return ResponseEntity.ok(new JwtResponse(token, refreshToken));
     }
 } 

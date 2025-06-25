@@ -13,14 +13,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -35,16 +35,27 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, 
                                        Authentication authentication) throws IOException, ServletException {
-        log.info("OAuth2 로그인 성공 처리");
+        String email;
+        Object principal = authentication.getPrincipal();
         
-        DefaultOAuth2User oauthUser = (DefaultOAuth2User) authentication.getPrincipal();
-        Map<String, Object> attributes = oauthUser.getAttributes();
+        if (principal instanceof OidcUser) {
+            OidcUser oidcUser = (OidcUser) principal;
+            email = oidcUser.getEmail();
+        } else if (principal instanceof OAuth2User) {
+            OAuth2User oAuth2User = (OAuth2User) principal;
+            email = (String) oAuth2User.getAttributes().get("email");
+        } else {
+            getRedirectStrategy().sendRedirect(request, response, "/login?error=unsupported_principal_type");
+            return;
+        }
         
-        String email = (String) attributes.getOrDefault("email", "");
+        if (email == null || email.isEmpty()) {
+            getRedirectStrategy().sendRedirect(request, response, "/login?error=email_not_found");
+            return;
+        }
         
         Optional<User> userOptional = userRepository.findByEmail(email);
         if (userOptional.isEmpty()) {
-            log.error("인증된 사용자를 데이터베이스에서 찾을 수 없습니다: {}", email);
             getRedirectStrategy().sendRedirect(request, response, "/login?error=user_not_found");
             return;
         }
@@ -63,7 +74,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         // 리프레시 토큰 생성
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getUsername());
         
-        // 프론트엔드 리다이렉트 URL (예시)
+        // 리다이렉트 URL
         String targetUrl = UriComponentsBuilder.fromUriString("/oauth2/redirect")
             .queryParam("token", accessToken)
             .queryParam("refreshToken", refreshToken.getToken())

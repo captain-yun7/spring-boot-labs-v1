@@ -1,31 +1,35 @@
 package com.captainyun7.ch505oauthspringsecuritylogin.controller;
 
+import com.captainyun7.ch505oauthspringsecuritylogin.dto.JwtResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
 public class IndexController {
 
     @GetMapping("/")
-    @ResponseBody
     public String index() {
-        return """
-                <h1>Spring Security OAuth2 예제</h1>
-                <p>GitHub 계정으로 로그인할 수 있습니다.</p>
-                <a href="/oauth2/authorize/github">GitHub로 로그인</a>
-                <br>
-                <p>또는</p>
-                <a href="/api/auth/oauth2-providers">OAuth2 제공자 정보 가져오기 (API)</a>
-                """;
+        return "Google OAuth2 로그인 예제 - <a href='/oauth2/authorize/google'>Google로 로그인</a>";
     }
 
     @GetMapping("/login")
-    @ResponseBody
     public String login() {
-        return """
-                <h1>로그인 페이지</h1>
-                <a href="/oauth2/authorize/github">GitHub로 로그인</a>
-                """;
+        return "로그인 페이지 - <a href='/oauth2/authorize/google'>Google로 로그인</a>";
+    }
+    
+    /**
+     * OAuth2 로그인 성공 후 리다이렉트되는 페이지
+     * 토큰을 JSON 형식으로 반환
+     */
+    @GetMapping("/oauth2/redirect")
+    public ResponseEntity<JwtResponse> oauthRedirect(@RequestParam String token, @RequestParam String refreshToken) {
+        return ResponseEntity.ok(new JwtResponse(token, refreshToken));
     }
 } 

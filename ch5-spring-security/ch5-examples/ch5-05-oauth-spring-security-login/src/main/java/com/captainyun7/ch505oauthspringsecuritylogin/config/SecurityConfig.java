@@ -41,12 +41,15 @@ public class SecurityConfig {
             )
             .oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(userInfo -> userInfo
-                    .userService(oAuth2UserService)
+                    .oidcUserService(oAuth2UserService)
                 )
                 .successHandler(oAuth2AuthenticationSuccessHandler)
                 .failureHandler(oAuth2AuthenticationFailureHandler)
                 .authorizationEndpoint(auth -> auth
                     .baseUri("/oauth2/authorize")
+                )
+                .redirectionEndpoint(redirection -> redirection
+                    .baseUri("/login/oauth2/code/*")
                 )
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

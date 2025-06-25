@@ -19,12 +19,20 @@ spring:
     oauth2:
       client:
         registration:
-          github:
-            client-id: ${GITHUB_CLIENT_ID}
-            client-secret: ${GITHUB_CLIENT_SECRET}
+          google:
+            client-id:
+            client-secret:
             scope:
-              - user:email
-              - read:user
+              - openid 
+              - profile
+              - email
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v2/userinfo
+            user-name-attribute: sub
 
 server:
   servlet:
@@ -35,3 +43,8 @@ jwt:
   secret: VzS3N6v9y$B&E)H@McQfTjWnZr4u7x!A%D*F-JaNdRgUkXp2s5v8y/B?E(H+KbPe
   expiration: 3600
   refresh-expiration: 604800
+
+logging:
+  level:
+    root: INFO
+    com.captainyun7.ch505oauthspringsecuritylogin: INFO
